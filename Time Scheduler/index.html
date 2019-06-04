@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+
+<body>
+
+<div id = "title" name = "title" >
+SCHEDULER
+</div>
+
+
+<form class = "inputs" id = "login" name = "login">
+<label>login </label><br>
+        <input 
+			type = "text"
+			id = "login"
+			value = "" 
+			
+			autofocus
+			required
+		/>
+		<br><br>
+		<label>password</label><br>
+        <input 
+			type = "password"
+			id = "pass"
+			value = "" 
+			
+			required
+			
+		/>
+		<br><br>
+		<label> group session</label><br>
+        <input
+			style="text-transform: uppercase;"
+			type = "text"
+			maxlength = "10"
+			id = "sessionkey"
+			value = "" 
+			pattern="[A-Z 0-9]*{10}"
+			required
+		/>
+		<br><br><br>
+		  <input type="submit" formmethod="post" value="submit">
+		<br><br>
+</form>
+
+<div id = "help" name = "help" >
+<a> create an account <a/>
+<br><br>
+<a> lost an account <a/>
+<br>
+</div> 
+
+
+
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>

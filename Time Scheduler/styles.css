@@ -1,0 +1,58 @@
+html
+{
+	  background-color: black;
+	  color:white;
+	  
+}
+
+body
+{
+		min-height: 75%;
+		min-width: 75%;
+		color:white;
+}
+
+form
+{
+	height: 50%;
+	width:50%;
+}
+	
+#title
+{
+	font-size: 2vw;
+	text-transform: uppercase;
+	margin:auto;
+	text-align: center;
+	min-height: 30%;
+	min-width : 100%;
+	letter-spacing: 10px;
+
+
+}
+
+.inputs
+{
+	width:50%;
+	font-size:80%;
+	text-transform: lowercase;
+	margin: auto;
+	text-align:center;
+	letter-spacing:5px;
+	padding: 2%;
+}
+
+#help
+{
+	font-size: 80%;
+	text-transform: lowercase;
+	margin:auto;
+	text-align:center;
+	min-height:20%;
+	min-width:100%;
+}
+
+a:hover
+{
+	color:gray;
+}
