@@ -1,13 +1,17 @@
 import java.io.File;
 import java.io.*;
+import java.awt.*;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
-import javax.imageio.ImageIO;
+import javax.imageio.*;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.Scanner;
+import java.util.*;
+import javax.imageio.*;
 
 public class pdf417
 {
+
 
   public static String listFilesForFolder(final File folder)
   {
@@ -21,10 +25,9 @@ public class pdf417
               name = name + (fileEntry.getAbsolutePath()) + "\n";
       return name;
   }
-
-  public static void threshold (BufferedImage picture)
+  public static void threshold (BufferedImage picture, int THRESHOLD)
   {
-    int THRESHOLD = 100;
+    //int THRESHOLD = 100;
     BufferedImage pic = picture;
     Color white = Color.WHITE;
     int rgbWhite = white.getRGB();
@@ -58,26 +61,64 @@ public class pdf417
     }
 
   }
+  public static void pixelate (BufferedImage img, int pixelsize)
+  {
+    try
+    {
+      BufferedImage imagePixelated = ImageUtil.pixelate(img, pixelsize);
+      ImageIO.write(imagePixelated, "png", new File("pixelate.png"));
+    }
+    catch (IOException e)
+    {
+    }
+  }
+
+
+
+
+
 
   public static void main(String args[])
   {
     //create an image object in ram
+
+    int slice = 0;
     BufferedImage image = null;
     String input_file_path ="";
+
+    Boolean leftup = true;
+    Boolean rightup = true;
+    Boolean leftdown = true;
+    Boolean rightdown = true;
+    final int deviation = 5;
+    int lastpixelx = 0; int lastpixely = 0; int lastpixelx2 = 0; int lastpixely2 = 0;
+            Vector<Integer> xbound = new Vector<Integer>();
+            Vector<Integer> ybound = new Vector<Integer>();
+
+                  //RED
+                  Color paint1 = new Color(255,0,0);
+                  int red = paint1.getRGB();
+
+                  //BLUE
+                  Color paint2 = new Color(0,0,255);
+                  int blue = paint2.getRGB();
+
+                  //GREEN
+                  Color paint3 = new Color(0,255,0);
+                  int green = paint3.getRGB();
+
+                  //GRAY
+                  Color paint4 = new Color(220,220,220);
+                  int GRAY = paint4.getRGB();
+
+                  //YELLOW
+                  Color paint5 = new Color(255, 255, 0);
+                  int yellow = paint5.getRGB();
     //READ
     try
     {
       //obtain file image
-
-
-      // FILE DIRECTORY HERE: --->
-      //=====================================
-      File input_folder = new File("");
-      //=====================================
-
-
-
-
+      File input_folder = new File("C:\\Users\\Logan\\Desktop\\random programs\\PDF417 READ\\read\\");
       listFilesForFolder(input_folder);
       String names = listFilesForFolder(input_folder);
       String[] array = names.split("\n");
@@ -98,22 +139,18 @@ public class pdf417
       //Type.TYPE_INT_ARGB is representing image pixel using 8bit int value
       //image = new BufferedImage (width,height, BufferedImage.TYPE_INT_ARGB);
 
-      //HARD CODE CHOICE TESTING:
-      //----------------------------------------
-      int choice = 1;
+      //HARD CODE TESTING:
+
+      int choice = 0;
       File input_file = new File(array[choice]);
-      //----------------------------------------
-
-
-
-
-
       image = ImageIO.read(input_file);
-      threshold(image);
+      pixelate(image,5);
+      threshold(image,100);
       System.out.println("Reading complete");
       //BufferedImage inputImg = ImageIO.read(input_file);
       //Instead of creating a new image... send it back to main object
-      image = ImageIO.read(input_file);
+      File threshold_file = new File("threshold.png");
+      image = ImageIO.read(threshold_file);
     }
 
     catch(IOException ex)
@@ -124,13 +161,12 @@ public class pdf417
     int y = image.getHeight();
     System.out.println("x = " + x);
     System.out.println("y = " + y);
-    int n = 0;
     //Boolean[][] scan = new Boolean[x][y];
 try
 {
       //int [][] pixels = new int[x][y];
-      Color paint = new Color(255,0,0);
-      int prgb = paint.getRGB();
+
+
     for (int xvalue = 0; xvalue < x; xvalue++)
     {
       for (int yvalue = 0; yvalue < y; yvalue++)
@@ -147,33 +183,181 @@ try
         int g = (argb>>8)&0xFF;
         int b = (argb>>0)&0xFF;
         int a = (argb>>24)&0xFF;
-        //CERTAIN COLOR PIXEL:
 
+        //CERTAIN COLOR PIXEL: [BLACK PIXEL]
+        //This alone, colors all black pixels in image.
+        //--------------------------------------------
         if ( r == 0 && g == 0 && b == 0)
         {
-          //image.setRGB(xvalue, yvalue, prgb);
-          int nextx = xvalue + 1;
-          int nexty = yvalue + 1;
-          while ((nextx <= y) && (nextx <= x))
+          int xaxis = xvalue;
+          int yaxis = yvalue;
+          slice++;
+          image.setRGB(xvalue, yvalue, red);
+          //FIND THE FIRST LEFT TOP PIXEL OF THE ENTIRE BLOCK
+          //------------------------------------------------
+          if (leftup == true)
           {
-            int given = image.getRGB(nextx, yvalue);
-            int rN = (given>>16)&0xFF;
-            int gN = (given>>8)&0xFF;
-            int bN = (given>>0)&0xFF;
-            int aN = (given>>24)&0xFF;
+            System.out.println("LEFT UP || PAINTED YELLOW AT : " + xvalue + " , " + yvalue);
+            image.setRGB(xvalue, yvalue, yellow);
+            leftup = false;
+          }
+          //------------------------------------------------
+
+          //FIND THE FIRST LEFT BOTTOM PIXEL OF THE ENTIRE BLOCK
+          //----------------------------------------------------
+          if (xbound.isEmpty())
+          {
+            //System.out.println("ADDED : " + xaxis);
+            xbound.add(xaxis);
+            lastpixelx = xaxis;
+            lastpixely = yvalue;
+          }
+          else
+          {
+          boolean range  = true;
+          for (int z = xaxis; z <= (xaxis+5); z++)
+          {
+            if (xbound.contains(z))
+            {
+              range = false;
+              //System.out.println("ignore: " + z);
+            }
+          }
+          for (int z = xaxis - 5; z <= (xaxis); z++)
+          {
+            if (xbound.contains(z))
+            {
+              range = false;
+              if (lastpixelx != xvalue && lastpixelx != 1)
+              {
+                //System.out.println(lastpixelx + " " + lastpixely + " -> "+ yvalue+ " " + xvalue);
+                if (leftdown == true)
+                {
+                System.out.println("LEFT DOWN || PAINTED YELLOW AT : " + lastpixelx + " , " + lastpixely);
+                image.setRGB(lastpixelx, lastpixely, yellow);
+                leftdown = false;
+                }
+
+              }
+              lastpixelx = xvalue; lastpixely = yvalue;
+              //System.out.println("ignore: " + z);
+              //System.out.println(" at " + xvalue + " " + yvalue);
+
+
+            }
+          }
+
+
+          if ( range == true)
+          {
+            xbound.add(xaxis);
+          }
+            //------------------------------------------------
+            //System.out.println("ADDED : " + xaxis);
+        }
+
+
+
+
+
+
+
+        //Let's check the next color over (in the x-direction) since we know the current one  is black!
+          int nextx = xvalue + 1;
+        //--------------------------------------------
+          //SAVE THE INTIAL BLACK PIXEL POSITION.
+          int row = yvalue;
+          //System.out.println("SQUARE ["+slice+"]");
+          //Use a loop to enable to scan The image in the x direction for as long as the image.
+
+
+
+
+
+          while ( (nextx < x))
+          {
+            //CHECK THE COLOR  OF THE [NEXT OVER PIXEL (WITHIN THE SAME ROW HENCE ROW CONSTANT)]
+            int given = image.getRGB(nextx, row);
+
+            /*
+            System.out.println("COLUMN: " + nextx);
+            System.out.println("ROW : " + row);
+            */
+
+            //TRANFROM BYTES TO COLORS
+             int rN = (given>>16)&0xFF;
+             int gN = (given>>8)&0xFF;
+             int bN = (given>>0)&0xFF;
+             int aN = (given>>24)&0xFF;
+
+
 
             if (rN == 0 && gN == 0 && bN == 0)
             {
-              image.setRGB(nextx,yvalue, prgb);
-            }
 
-            if (nextx <= x)
-            {
-              nextx++;
+              //System.out.println("COLORED");
+              image.setRGB(nextx,row, green); //color the black pixel a color if you wanted to as well.
+              nextx++;  //at this point it is okay to move to the next pixel in the x direction.
+
             }
-            if (nexty <= y)
+            //BASE CASE CHECK IF IT IS WHITE!
+            else if (rN == 255 && gN == 255 && bN == 255)
             {
-              nexty++;
+               //System.out.println("lastx : " + lastpixelx2 + " lasty : " + lastpixely2 + "\t cx: " + nextx + " cy: " + row);
+               if (lastpixelx2 != nextx)
+               {
+
+                   if (rightdown == true && lastpixelx2 != 0) // LastPixelx2 can't be zero only if the image has a black pixel in the topleftcorner to be read.
+                   {
+                     System.out.println("RIGHT DOWN || PAINTED YELLOW AT : " + lastpixelx2 + " , " + lastpixely2);
+                     image.setRGB(lastpixelx2,lastpixely2, yellow);
+                     rightdown = false;
+
+                   }
+
+             }
+               lastpixelx2 = nextx;
+               lastpixely2 = row;
+
+               image.setRGB(nextx,row, blue); //color the white pixel a color if you wanted to.
+               //FIND THE FIRST LEFT TOP PIXEL OF THE ENTIRE IMAGE
+               //------------------------------------------------
+               if (rightup == true)
+               {
+
+                 image.setRGB(nextx, row, yellow);
+                 System.out.println("RIGHT UP || PAINTED YELLOW AT : " + nextx + " , " + row);
+                 rightup = false;
+               }
+               //------------------------------------------------
+              //revert to the intial position of black color where you started.
+              //at this point you're down with this row and need to move new row
+
+                               int get = image.getRGB(nextx, row + 1);
+                               //TRANFROM BYTES TO COLORS
+                                int rw = (given>>16)&0xFF;
+                                int gw = (given>>8)&0xFF;
+                                int bw = (given>>0)&0xFF;
+                                int aw = (given>>24)&0xFF;
+
+                                if (rw == 255 && gw == 255 && bw == 255)
+                                {
+                                //   if (slice == 5399)
+                                //   {
+                                //     String save = "slice[" + slice + "].jpg";
+                                //     ImageIO.write(image.getSubimage(0, 0, x, y), "png", new File(save));
+                                //     if( slice == 5)
+                                //     {
+                                //       System.exit(0);
+                                //     }
+                                // }
+
+                                  break;
+
+
+                                }
+                                row++;
+
             }
 
           }
@@ -183,11 +367,11 @@ try
         //System.out.println("GREEN [" + g + "]");
         //System.out.println("BLUE [" + b + "]");
         //System.out.println("ALPHA [" + a + "]");
+        System.out.print("\t AT : (" + x + ","+ y + ") RED[" + r +"]|GREEN["+ g + "]|BLUE[" + b +"]|ALPHA[" + a + "]\n");
       }
-    }
 
-    System.out.println(n);
-    File outputfile = new File("saved.png");
+    }
+    File outputfile = new File("output.png");
     ImageIO.write(image, "png", outputfile);
   }
 
@@ -198,6 +382,6 @@ try
 
 
 
-  System.out.println("process completed");
+  System.out.println("\n\n\nprocess completed");
 }
 }
