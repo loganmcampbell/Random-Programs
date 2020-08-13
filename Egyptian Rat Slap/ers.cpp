@@ -34,6 +34,10 @@ int randomnumber2()
     int randomnumber = rand() % 15;
     return (randomnumber);
 }
+
+
+
+
 int main()
 {
   string title = "| E G Y P T I A N  R A T  S L A P |\n";
@@ -42,5 +46,11 @@ int main()
   cout << "___________________________________" << endl;
   cout << endl; cout << endl;
 
+  randomseed()
+  int turns = 1;
+  while (turns < 52)
+  {
+
+  }
   return 0;
 }
